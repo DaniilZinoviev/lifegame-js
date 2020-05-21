@@ -13,8 +13,8 @@
     let width = 10;
     let height = 10;
 
-    createTable(table, width, height);
-    fillWithLife(table, width, height);
+    createTable(width, height);
+    fillWithLife(width, height);
 
     // tick(table, width, height);
     // setTimeout(function() {
@@ -22,7 +22,7 @@
     // }, 1000);
 
     // Initial filling the table
-    function createTable(table, width = 10, height = 10) {
+    function createTable(width = 10, height = 10) {
         for (let y = 0; y < height; y++) {
             let row = document.createElement('tr');
             for (let x = 0; x < width; x++) {
@@ -33,22 +33,23 @@
         }
     }
 
-    function fillWithLife(table, width, height, method = 'random') {
-        forEachCell(table, width, height, function(cell) {
+    function fillWithLife(width, height, method = 'random') {
+        forEachCell(width, height, function(cell) {
             if (method === 'random' && Math.random() > 0.9) {
                 setLive(cell);
             }
         });
     }
 
-    function tick(table, width, height) {
-        forEachCell(table, width, height, function(cell, x, y) {
-            let neigbours = getNeigbours(table, x, y);
+    function tick(width, height) {
+        forEachCell(width, height, function(cell, x, y) {
+            let neigbours = getNeigbours(x, y);
             if (isLive(cell)) {
                 if (neigbours.live > 3 || neigbours.live < 2) {
                     unsetLive(cell);
                 }
             } else {
+                console.log('alive', cell, neigbours);
                 if (neigbours.live === 3) {
                     setLive(cell);
                 }
@@ -57,7 +58,7 @@
     }
 
     // @return {live: number; empty: number;}
-    function getNeigbours(table, y, x) {
+    function getNeigbours(x, y) {
         let response = {live: 0, empty: 0};
         for(let yDiff = -1; yDiff <= 1; yDiff++) {
             let row = table.rows[y + yDiff];
@@ -85,7 +86,7 @@
         cell.classList.remove(liveClass);
     }
 
-    function forEachCell(table, width, height, func) {
+    function forEachCell(width, height, func) {
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 let cell = table.rows[y].cells[x];
@@ -105,7 +106,7 @@
     });
 
     tickBtn.addEventListener('mousedown', function(e) {
-        tick(table, width, height);
+        tick(width, height);
     });
 
 // })();
