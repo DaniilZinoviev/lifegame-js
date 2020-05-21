@@ -6,6 +6,7 @@
  -  если у живой клетки есть две или три живые соседки,то эта клетка продолжает жить;
     в противном случае (если соседей меньше двух или больше трёх) клетка умирает («от одиночества» или «от перенаселённости»).
 */
+
 // ;(function(){
     
     window.table = document.getElementById('lifegame');
@@ -13,100 +14,119 @@
     let width = 10;
     let height = 10;
 
-    createTable(width, height);
-    fillWithLife(width, height);
+    class Lifegame {
+        constructor(table, options = {}) {
+            if (!table) throw new Error("Lifegame: Requires first argument table!");
 
-    // tick(table, width, height);
-    // setTimeout(function() {
-    //     tick(table, width, height);
-    // }, 1000);
+            this.table  = table;
+            this.width  = options.width || 10;
+            this.height = options.height || 10;
+            this.liveClass = options.liveClass || 'live';
+            this.tickBtn = options.tickBtn || null;
 
-    // Initial filling the table
-    function createTable(width = 10, height = 10) {
-        for (let y = 0; y < height; y++) {
-            let row = document.createElement('tr');
-            for (let x = 0; x < width; x++) {
-                let column = document.createElement('td');
-                row.appendChild(column);
-            }
-            table.appendChild(row);
+            this.init();
         }
-    }
 
-    function fillWithLife(width, height, method = 'random') {
-        forEachCell(width, height, function(cell) {
-            if (method === 'random' && Math.random() > 0.9) {
-                setLive(cell);
-            }
-        });
-    }
+        init() {
+            this.createTable();
+            this.fillWithLife();
 
-    function tick(width, height) {
-        forEachCell(width, height, function(cell, x, y) {
-            let neigbours = getNeigbours(x, y);
-            if (isLive(cell)) {
-                if (neigbours.live > 3 || neigbours.live < 2) {
+            this.table.addEventListener('mousedown', (e) => {
+                let cell = e.target;
+                if (cell.tagName !== 'TD') return;
+                if (isLive(cell)) {
                     unsetLive(cell);
-                }
-            } else {
-                console.log('alive', cell, neigbours);
-                if (neigbours.live === 3) {
+                } else {
                     setLive(cell);
                 }
-            }
-        });
-    }
-
-    // @return {live: number; empty: number;}
-    function getNeigbours(x, y) {
-        let response = {live: 0, empty: 0};
-        for(let yDiff = -1; yDiff <= 1; yDiff++) {
-            let row = table.rows[y + yDiff];
-            if (!row) continue;
-            for (let xDiff = -1; xDiff <= 1; xDiff++) {
-                let cell = row.cells[x + xDiff];
-                let isCurrent = yDiff === 0 && xDiff === 0;
-                if (!cell || isCurrent) continue;
-                isLive(cell) ? response.live++ : response.empty++;
+            });
+        
+            if (this.tickBtn) {
+                this.tickBtn.addEventListener('mousedown', () => {
+                    this.tick();
+                });
             }
         }
-        return response;
-    }
 
-    // @return boolean
-    function isLive(cell, liveClass = 'live') {
-        return cell.classList.contains(liveClass);
-    }
-
-    function setLive(cell, liveClass = 'live') {
-        cell.classList.add(liveClass);
-    }
-
-    function unsetLive(cell, liveClass = 'live') {
-        cell.classList.remove(liveClass);
-    }
-
-    function forEachCell(width, height, func) {
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                let cell = table.rows[y].cells[x];
-                func(cell, x, y);
+        createTable() {
+            for (let y = 0; y < this.height; y++) {
+                let row = document.createElement('tr');
+                for (let x = 0; x < this.width; x++) {
+                    let column = document.createElement('td');
+                    row.appendChild(column);
+                }
+                this.table.appendChild(row);
             }
         }
-    }
+
+        fillWithLife(method = 'random') {
+            this._forEachCell((cell) => {
+                if (method === 'random' && Math.random() > 0.9) {
+                    this.setLive(cell);
+                }
+            });
+        }
+
+        tick() {
+            this._forEachCell((cell, x, y) => {
+                let neigbours = this.getNeigbours(x, y);
+                if (this.isLive(cell)) {
+                    if (neigbours.live > 3 || neigbours.live < 2) {
+                        this.unsetLive(cell);
+                    }
+                } else {
+                    console.log('alive', cell, neigbours);
+                    if (neigbours.live === 3) {
+                        this.setLive(cell);
+                    }
+                }
+            });
+        }
+
+        getNeigbours(x, y) {
+            let response = {live: 0, empty: 0};
+            for(let yDiff = -1; yDiff <= 1; yDiff++) {
+                let row = this.table.rows[y + yDiff];
+
+                if (!row) continue;
+                
+                for (let xDiff = -1; xDiff <= 1; xDiff++) {
+                    let cell = row.cells[x + xDiff],
+                        isCurrent = yDiff === 0 && xDiff === 0;
+
+                    if (!cell || isCurrent) continue;
+
+                    this.isLive(cell) ? response.live++ : response.empty++;
+                }
+            }
+            return response;
+        }
+
+        isLive(cell) {
+            return cell.classList.contains(this.liveClass);
+        }
     
-    table.addEventListener('mousedown', function(e) {
-        let cell = e.target;
-        if (cell.tagName !== 'TD') return;
-        if (isLive(cell)) {
-            unsetLive(cell);
-        } else {
-            setLive(cell);
+        setLive(cell) {
+            cell.classList.add(this.liveClass);
         }
-    });
+    
+        unsetLive(cell) {
+            cell.classList.remove(this.liveClass);
+        }
+    
+        _forEachCell(func) {
+            for (let y = 0; y < this.height; y++) {
+                for (let x = 0; x < this.width; x++) {
+                    let cell = this.table.rows[y].cells[x];
+                    func(cell, x, y);
+                }
+            }
+        }
 
-    tickBtn.addEventListener('mousedown', function(e) {
-        tick(width, height);
+    }
+
+    new Lifegame(table, {
+        tickBtn: tickBtn
     });
 
 // })();
