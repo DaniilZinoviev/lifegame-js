@@ -15,31 +15,53 @@
     let height = 10;
 
     class Lifegame {
-        constructor(table, options = {}) {
-            if (!table) throw new Error("Lifegame: Requires first argument table!");
+        constructor(options = {}) {
+            if (!options.table) throw new Error("Lifegame: Requires first argument table!");
 
-            this.table  = table;
+            this.table  = options.table;
             this.width  = options.width || 10;
             this.height = options.height || 10;
             this.liveClass = options.liveClass || 'live';
             this.tickBtn = options.tickBtn || null;
 
+            this.matrix = this.createMatrix();
             this.init();
         }
 
+        createMatrix() {
+            let matrix = [];
+            for (let y = 0; y < this.height; y++) {
+                let row = [];
+                for (let x = 0; x < this.width; x++) {
+                    row.push({
+                        isLive: false,
+                        markedAsLive: false
+                    });
+                }
+                matrix.push(row);
+            }
+            return matrix;
+        }
+
         init() {
-            this.createTable();
             this.fillWithLife();
 
-            this.table.addEventListener('mousedown', (e) => {
-                let cell = e.target;
-                if (cell.tagName !== 'TD') return;
-                if (isLive(cell)) {
-                    unsetLive(cell);
-                } else {
-                    setLive(cell);
-                }
-            });
+            if (this.table) {
+                this.createTable();
+                this.renderTable();
+                this.table.addEventListener('mousedown', (e) => {
+                    let target = e.target;
+                    if (target.tagName !== 'TD') return;
+                    // Get matrix td to this td
+                    let cell = this.getMatrixCell(target);
+                    if (this.isLive(cell)) {
+                        this.unsetLive(cell);
+                    } else {
+                        this.setLive(cell);
+                    }
+                    this.renderTable();
+                });
+            }
         
             if (this.tickBtn) {
                 this.tickBtn.addEventListener('mousedown', () => {
@@ -59,73 +81,120 @@
             }
         }
 
+        // @param td = HTMLElement TD
+        getMatrixCell(td) {
+            let x = td.cellIndex;
+            let y = td.parentElement.rowIndex;
+            return this.matrix[y][x];
+        }
+
+        // @param method = string
         fillWithLife(method = 'random') {
-            this._forEachCell((cell) => {
-                if (method === 'random' && Math.random() > 0.9) {
-                    this.setLive(cell);
-                }
+            this.matrix.forEach((row, y) => {
+                row.forEach((cell, x) => {
+                    if (method === 'random' && Math.random() > 0.9) {
+                        this.setLive(cell);
+                    }
+                });
             });
         }
 
         tick() {
-            this._forEachCell((cell, x, y) => {
-                let neigbours = this.getNeigbours(x, y);
-                if (this.isLive(cell)) {
-                    if (neigbours.live > 3 || neigbours.live < 2) {
-                        this.unsetLive(cell);
+            this.matrix.forEach((row, y) => {
+                row.forEach((cell, x) => {
+                    let neigbours = this.getNeigbours(x, y);
+                    if (this.isLive(cell)) {
+                        if (neigbours.live > 3 || neigbours.live < 2) {
+                            this.unmarkAsLive(cell);
+                        } else {
+                            this.markAsLive(cell);
+                        }
+                    } else {
+                        if (neigbours.live === 3) {
+                            this.markAsLive(cell);
+                        } else {
+                            this.unmarkAsLive(cell);
+                        }
                     }
-                } else {
-                    console.log('alive', cell, neigbours);
-                    if (neigbours.live === 3) {
-                        this.setLive(cell);
-                    }
-                }
+                });
+            });
+            this.setMarked();
+            this.renderTable();
+        }
+
+        setMarked() {
+            this.matrix.forEach((row, y) => {
+                row.forEach((cell, x) => {
+                    cell.isLive = cell.markedAsLive;
+                });
             });
         }
 
+        renderTable() {
+            this.matrix.forEach((row, y) => {
+                row.forEach((cell, x) => {
+                    let tableCell = this.table.rows[y].cells[x];
+                    if (this.isLive(cell)) {
+                        tableCell.classList.add(this.liveClass);
+                    } else {
+                        tableCell.classList.remove(this.liveClass);
+                    }
+                });
+            });
+        }
+
+        // @param x = number
+        // @param y = number
+        // @return {live: boolean, empty: boolean};
         getNeigbours(x, y) {
             let response = {live: 0, empty: 0};
             for(let yDiff = -1; yDiff <= 1; yDiff++) {
-                let row = this.table.rows[y + yDiff];
-
+                let row = this.matrix[y + yDiff]
                 if (!row) continue;
-                
                 for (let xDiff = -1; xDiff <= 1; xDiff++) {
-                    let cell = row.cells[x + xDiff],
+                    let cell = row[x + xDiff],
                         isCurrent = yDiff === 0 && xDiff === 0;
-
                     if (!cell || isCurrent) continue;
-
-                    this.isLive(cell) ? response.live++ : response.empty++;
+                    this.isMarkedAsLive(cell) ? response.live++ : response.empty++;
                 }
             }
             return response;
         }
 
+        // @param cell = {isLive: boolean; markedAsLive: boolean;}
         isLive(cell) {
-            return cell.classList.contains(this.liveClass);
+            return cell.isLive;
+        }
+
+        // @param cell = {isLive: boolean; markedAsLive: boolean;}
+        isMarkedAsLive(cell) {
+            return cell.isLive;
         }
     
+        // @param cell = {isLive: boolean; markedAsLive: boolean;}
         setLive(cell) {
-            cell.classList.add(this.liveClass);
+            cell.isLive = true;
         }
     
+        // @param cell = {isLive: boolean; markedAsLive: boolean;}
         unsetLive(cell) {
-            cell.classList.remove(this.liveClass);
+            cell.isLive = false;
+        }
+
+        // @param cell = {isLive: boolean; markedAsLive: boolean;}
+        markAsLive(cell) {
+            cell.markedAsLive = true;
         }
     
-        _forEachCell(func) {
-            for (let y = 0; y < this.height; y++) {
-                for (let x = 0; x < this.width; x++) {
-                    let cell = this.table.rows[y].cells[x];
-                    func(cell, x, y);
-                }
-            }
+        // @param cell = {isLive: boolean; markedAsLive: boolean;}
+        unmarkAsLive(cell) {
+            cell.markedAsLive = false;
         }
 
     }
 
-    new Lifegame(table, {
+    window.lifegame = new Lifegame({
+        table: table,
         tickBtn: tickBtn
     });
 
