@@ -4,16 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lifegame</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="libs/fontawesome/css/solid.min.css">
+    <link rel="stylesheet" href="libs/fontawesome/css/fontawesome.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    
-    <table id="lifegame">
-        <!-- The game will be here -->
-    </table>
+<body class="bg-light">
 
-    <div class="buttons">
-        <button id="tick">Tick</button>
+    <header class="bg-dark p-3 mb-5">
+        <h1 class="text-center text-white">Life Game</h1>
+    </header>
+    
+    <div class="container mb-5">
+        <table id="lifegame" class="mx-auto mb-3 user-select-none">
+            <!-- The game will be here -->
+        </table>
+
+        <div class="buttons text-center">
+            <button id="tick" class="btn btn-outline-dark btn-sm">Tick</button>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-md-10 mx-auto">
+                <h2 class="mb-3">
+                    Rules:
+                </h2>
+                <p>
+                    <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" target="_blank">
+                        Wiki 
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </p>
+                <p>The universe of the Game of Life is an infinite, two-dimensional orthogonal grid of square cells, 
+                    each of which is in one of two possible states, live or dead, (or populated and unpopulated, respectively). 
+                    Every cell interacts with its eight neighbours, which are the cells that are horizontally, vertically, or diagonally adjacent.
+                    At each step in time, the following transitions occur:
+                </p>
+
+                
+                <ol>
+                    <li>Any live cell with fewer than two live neighbours dies, as if by underpopulation. <i class="fas fa-skull"></i></li>
+                    <li>Any live cell with two or three live neighbours lives on to the next generation. <i class="fas fa-heart"></i></li>
+                    <li>Any live cell with more than three live neighbours dies, as if by overpopulation. <i class="fas fa-skull"></i></li>
+                    <li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction. <i class="fas fa-heart"></i></li>
+                </ol>
+
+                <p>These rules, which compare the behavior of the automaton to real life, can be condensed into the following:</p>
+            
+                <ol>
+                    <li>Any live cell with two or three live neighbours survives. <i class="fas fa-heart"></i></li>
+                    <li>Any dead cell with three live neighbours becomes a live cell. <i class="fas fa-heart"></i></li>
+                    <li>All other live cells die in the next generation. Similarly, all other dead cells stay dead. </li>
+                </ol>
+
+                <p>The initial pattern constitutes the seed of the system. 
+                    The first generation is created by applying the above rules simultaneously to every cell in the seed; births and deaths occur simultaneously,
+                    and the discrete moment at which this happens is sometimes called a tick. Each generation is a pure function of the preceding one. 
+                    The rules continue to be applied repeatedly to create further generations.</p>
+
+            </div>
+        </div>
+        
     </div>
 
     <script src="js/script.js" defer></script>

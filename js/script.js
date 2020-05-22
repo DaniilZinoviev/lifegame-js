@@ -104,16 +104,14 @@
                 row.forEach((cell, x) => {
                     let neigbours = this.getNeigbours(x, y);
                     if (this.isLive(cell)) {
+                        this.markAsLive(cell);
                         if (neigbours.live > 3 || neigbours.live < 2) {
                             this.unmarkAsLive(cell);
-                        } else {
-                            this.markAsLive(cell);
                         }
                     } else {
+                        this.unmarkAsLive(cell);
                         if (neigbours.live === 3) {
                             this.markAsLive(cell);
-                        } else {
-                            this.unmarkAsLive(cell);
                         }
                     }
                 });
