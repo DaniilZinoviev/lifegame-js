@@ -1,0 +1,31 @@
+{
+  "name": "lifegame-js",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "webpack serve --env MODE=development",
+    "build": "webpack --env MODE=production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DaniilZinoviev/lifegame-js.git"
+  },
+  "keywords": [],
+  "author": "Daniil Zinoviev <danzino21@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DaniilZinoviev/lifegame-js/issues"
+  },
+  "homepage": "https://github.com/DaniilZinoviev/lifegame-js#readme",
+  "devDependencies": {
+    "css-loader": "^5.0.1",
+    "html-webpack-plugin": "^4.5.0",
+    "mini-css-extract-plugin": "^1.3.1",
+    "node-sass": "^5.0.0",
+    "sass-loader": "^10.1.0",
+    "style-loader": "^2.0.0",
+    "webpack": "^5.8.0",
+    "webpack-cli": "^4.2.0",
+    "webpack-dev-server": "^3.11.0"
+  }
+}
